@@ -152,6 +152,44 @@ stylesheet = """
         border-radius: 5px;
     }
 """
+
+# Function to perform database query and update results_list
+def perform_search():
+    search_column = combo_box.currentText()
+    search_value = search_text.text()
+    
+    # Connect to our database
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Query database
+    query = f"SELECT * FROM cannabis WHERE {search_column} LIKE ?"
+    cursor.execute(query, (f"%{search_value}%",))
+    results = cursor.fetchall()
+    
+    # Clear existing items from the results list
+    results_list.clear()
+    
+    # Populate results list with new items (Strain names)
+    for result in results:
+        results_list.addItem(result[0])  # Strain is the first column, index 0
+    
+    # Close database connection
+    conn.close()
+
+# Function to clear search results and detail fields
+def clear_results():
+    results_list.clear()
+    strain_text.clear()
+    type_text.clear()
+    rating_text.clear()
+    effects_list.clear()
+    flavor_list.clear()
+    description_text.clear()
+
+# Connect search button and clear button to their respective functions
+search_button.clicked.connect(perform_search)
+clear_button.clicked.connect(clear_results)
 app.setStyleSheet(stylesheet)
 
 window.show()
