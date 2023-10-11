@@ -1,16 +1,26 @@
+# This code is provided to you for free, with no warranty, and no guarantee of support.
+
+# This is a simple GUI application that allows you to search a SQLite database of cannabis strains.
+
+# License: MIT License (https://opensource.org/licenses/MIT)
+# (do whatever you want with it)
+
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QLineEdit, QPushButton, QFrame, QListWidget, QTextEdit, QSizePolicy
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
 import sqlite3
 import sys
 
 # SQLite Setup
 # Using SQLite3 for the database, in our app path
-db_path = 'pyleafdata.db'  # Path to the database
+db_path = 'pyleafdata.db'  # The database, in the same folder as this script
 
 # App Setup
 app = QApplication(sys.argv)
 window = QWidget()
 window.setWindowTitle("PyLeaf")
+window.setWindowIcon(QIcon("leaf.png"))
+window.setFixedHeight(600)
 
 main_layout = QVBoxLayout()
 
@@ -126,6 +136,10 @@ results_details_layout.addLayout(details_layout)
 
 main_layout.addLayout(results_details_layout)
 
+# About Button
+about_button = QPushButton("About")
+details_layout.addWidget(about_button)
+
 # Apply Styles and Layouts
 window.setLayout(main_layout)
 
@@ -190,7 +204,64 @@ def clear_results():
 # Connect search button and clear button to their respective functions
 search_button.clicked.connect(perform_search)
 clear_button.clicked.connect(clear_results)
-app.setStyleSheet(stylesheet)
 
+# Function to populate details when a list item is selected
+def populate_details():
+    selected_strain = results_list.currentItem().text()
+    
+    # Connect to SQLite database
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Query database for details
+    query = "SELECT * FROM cannabis WHERE Strain = ?"
+    cursor.execute(query, (selected_strain,))
+    result = cursor.fetchone()
+    
+    # Populate detail fields
+    strain_text.setText(result[0])
+    type_text.setText(result[1])
+    rating_text.setText(str(result[2]))
+    
+    # Clear existing items from effects and flavor lists
+    effects_list.clear()
+    flavor_list.clear()
+    
+    # Populate effects and flavor lists
+    for effect in result[3].split(','):
+        effects_list.addItem(effect.strip())
+    for flavor in result[4].split(','):
+        flavor_list.addItem(flavor.strip())
+    
+    # Populate description
+    description_text.setPlainText(result[5])
+    
+    # Close database connection
+    conn.close()
+
+# Connect the item selection signal to the populate_details function
+results_list.itemSelectionChanged.connect(populate_details)
+
+
+# Function to open the About window
+def open_about_window():
+    about_window = QWidget()
+    about_window.setWindowTitle("About PyLeaf")
+    about_window.setFixedSize(400, 300)
+
+    about_layout = QVBoxLayout()
+    
+    about_label = QLabel("PyLeaf: Cannabis Strain Information\n\nVersion: 1.0\n\nDatabase: pyleafdata.db")
+    about_label.setAlignment(Qt.AlignCenter)
+    
+    about_layout.addWidget(about_label)
+    about_window.setLayout(about_layout)
+    
+    about_window.show()
+
+# Connect the About button to open_about_window
+about_button.clicked.connect(open_about_window)
+
+app.setStyleSheet(stylesheet)
 window.show()
 app.exec()
