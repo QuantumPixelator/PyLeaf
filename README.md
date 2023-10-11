@@ -1,5 +1,13 @@
 # PyLeaf
-This is a Python program that uses PySide6 to create a GUI app that displays information about cannabis strains. Written in Python 3.11.5, and PySide6 5.xx
+A Python GUI app that uses PySide6 to display information about cannabis strains. Written in Python 3.11.5, and PySide6 5.xx
+
+##
+## Cross-Platform: 
+` Windows`
+
+` Linux`
+
+` macOS`
 
 ##
 ## Dataset: 
