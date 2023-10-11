@@ -1,28 +1,60 @@
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QLineEdit, QPushButton, QFrame, QListWidget, QTextEdit, QSizePolicy
+# This is a Python program that uses PySide6 to create a GUI app that displays information about cannabis strains.
+
+# This script comes to you without any warranty whatsoever. I've tried to ensure it is bug-free, but I can't guarantee it. Use at your own risk. If you find any bugs, please let me know or open a pull request on GitHub.
+
+# The data used in this app was obtained from Kaggle:
+# https://www.kaggle.com/datasets/kingburrito666/cannabis-strains/
+
+# License: MIT License (do whatever you want with it)
+
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QComboBox, QLineEdit, QPushButton, QFrame, QListWidget, QTextEdit, QSizePolicy, QMessageBox
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QDesktopServices, QIcon, QFont
 import sqlite3
 import sys
 
-# SQLite Setup
-# Using SQLite3 for the database, in our app path
-db_path = 'pyleafdata.db'  # Path to the database
+# SQLite database, complete with full path
+db_path = 'pyleafdata.db'
+
+# Function to populate details
+def display_details(current_item):
+    if current_item:
+        selected_strain = current_item.text()
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        query = "SELECT * FROM cannabis WHERE Strain = ?"
+        cursor.execute(query, (selected_strain,))
+        result = cursor.fetchone()
+        
+        if result:
+            strain_text.setText(result[0])
+            type_text.setText(result[1])
+            rating_text.setText(str(result[2]))
+            effects_list.clear()
+            effects_list.addItems(result[3].split(","))
+            flavor_list.clear()
+            flavor_list.addItems(result[4].split(","))
+            description_text.setText(result[5])
+        
+        conn.close()
 
 # App Setup
 app = QApplication(sys.argv)
 window = QWidget()
 window.setWindowTitle("PyLeaf")
+window.setWindowIcon(QIcon("resources/leaf.png"))
 
 main_layout = QVBoxLayout()
-
-# Header Label
-header_label = QLabel("PyLeaf: Cannabis Strain Information")
+header_label = QLabel(" \nPyLeaf: Cannabis Strain Information\n ")
+font = QFont()
+font.setBold(True)
+header_label.setFont(font)
 header_label.setAlignment(Qt.AlignCenter)
 main_layout.addWidget(header_label)
 
-# Search Controls
 search_layout = QHBoxLayout()
 combo_box = QComboBox()
-combo_box.addItems(["Strain", "Type", "Rating", "Effects", "Flavor", "Descriptions"])
+combo_box.addItems(["Strain", "Type", "Rating", "Effects", "Flavor", "Description"])
 search_layout.addWidget(combo_box)
 
 search_text = QLineEdit()
@@ -36,23 +68,18 @@ search_layout.addWidget(clear_button)
 
 main_layout.addLayout(search_layout)
 
-# Divider
 divider = QFrame()
 divider.setFrameShape(QFrame.HLine)
 divider.setFrameShadow(QFrame.Sunken)
 main_layout.addWidget(divider)
 
-# Results and Details
 results_details_layout = QHBoxLayout()
 
-# Results List
 results_list = QListWidget()
 results_details_layout.addWidget(results_list)
 
-# Details
 details_layout = QVBoxLayout()
 
-# Strain, Type, Rating
 details_top_layout = QHBoxLayout()
 
 strain_text = QLineEdit()
@@ -79,13 +106,11 @@ details_top_layout.addWidget(rating_text)
 
 details_layout.addLayout(details_top_layout)
 
-# Divider
 divider2 = QFrame()
 divider2.setFrameShape(QFrame.HLine)
 divider2.setFrameShadow(QFrame.Sunken)
 details_layout.addWidget(divider2)
 
-# Effects and Flavor List
 effects_list = QListWidget()
 effects_list.setFixedHeight(100)
 effects_list.setFixedWidth(150)
@@ -100,14 +125,34 @@ flavor_list.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 flavor_label = QLabel("Flavor:")
 flavor_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
+about_button = QPushButton("About")
+about_button.setFixedWidth(150)
+
+# Function to display app info
+def show_about_info():
+    msg = QMessageBox()
+    msg.setWindowTitle("About PyLeaf")
+    msg.setText('PyLeaf: Cannabis Strain Information<br><br>Developed by Quantum Pixelator<br><br>The data used is from:<br>'
+                '<a href="https://www.kaggle.com/datasets/kingburrito666/cannabis-strains/">Cannabis Strains from Kaggle</a><br><br>License: MIT License<br><br>Source code available on <a href="https://github.com/QuantumPixelator/PyLeaf">GitHub</a>')
+    # Enable link interaction.
+    msg.setTextInteractionFlags(Qt.TextBrowserInteraction)
+
+    # Open the link in an external browser when the user clicks the OK button.
+    msg.buttonClicked.connect(lambda button: QDesktopServices.openUrl("https://www.kaggle.com/datasets/kingburrito666/cannabis-strains/") if button == QMessageBox.Ok else None)
+
+    msg.exec()
+
+
+about_button.clicked.connect(show_about_info)
+
 effects_flavor_layout = QVBoxLayout()
 effects_flavor_layout.addWidget(effects_label)
 effects_flavor_layout.addWidget(effects_list)
 effects_flavor_layout.addWidget(flavor_label)
 effects_flavor_layout.addWidget(flavor_list)
-effects_flavor_layout.addStretch(1)  # Anchor widgets to the top
+effects_flavor_layout.addStretch(1)
+effects_flavor_layout.addWidget(about_button)
 
-# Description Text Box
 description_text = QTextEdit()
 description_text.setReadOnly(True)
 description_text.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -126,7 +171,6 @@ results_details_layout.addLayout(details_layout)
 
 main_layout.addLayout(results_details_layout)
 
-# Apply Styles and Layouts
 window.setLayout(main_layout)
 
 stylesheet = """
@@ -153,31 +197,19 @@ stylesheet = """
     }
 """
 
-# Function to perform database query and update results_list
 def perform_search():
     search_column = combo_box.currentText()
     search_value = search_text.text()
-    
-    # Connect to our database
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    
-    # Query database
     query = f"SELECT * FROM cannabis WHERE {search_column} LIKE ?"
     cursor.execute(query, (f"%{search_value}%",))
     results = cursor.fetchall()
-    
-    # Clear existing items from the results list
     results_list.clear()
-    
-    # Populate results list with new items (Strain names)
     for result in results:
-        results_list.addItem(result[0])  # Strain is the first column, index 0
-    
-    # Close database connection
+        results_list.addItem(result[0])
     conn.close()
 
-# Function to clear search results and detail fields
 def clear_results():
     results_list.clear()
     strain_text.clear()
@@ -187,10 +219,11 @@ def clear_results():
     flavor_list.clear()
     description_text.clear()
 
-# Connect search button and clear button to their respective functions
 search_button.clicked.connect(perform_search)
 clear_button.clicked.connect(clear_results)
-app.setStyleSheet(stylesheet)
+results_list.currentItemChanged.connect(lambda current_item: display_details(current_item))
 
+app.setStyleSheet(stylesheet)
+window.resize(700, 600)
 window.show()
 app.exec()
