@@ -132,7 +132,7 @@ about_button.setFixedWidth(150)
 def show_about_info():
     msg = QMessageBox()
     msg.setWindowTitle("About PyLeaf")
-    msg.setText('PyLeaf: Cannabis Strain Information<br><br>Developed by Quantum Pixelator<br><br>The data used is from:<br>'
+    msg.setText('PyLeaf: Cannabis Strain Information<br><br>by Quantum Pixelator<br><br>The data used is from:<br>'
                 '<a href="https://www.kaggle.com/datasets/kingburrito666/cannabis-strains/">Cannabis Strains from Kaggle</a><br><br>License: MIT License<br><br>Source code available on <a href="https://github.com/QuantumPixelator/PyLeaf">GitHub</a>')
     # Enable link interaction.
     msg.setTextInteractionFlags(Qt.TextBrowserInteraction)
@@ -211,6 +211,7 @@ def perform_search():
     conn.close()
 
 def clear_results():
+    search_text.clear()
     results_list.clear()
     strain_text.clear()
     type_text.clear()
