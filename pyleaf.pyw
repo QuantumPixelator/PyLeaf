@@ -1,4 +1,4 @@
-# This is a Python program that uses PySide6 to create a GUI app that displays information about cannabis strains.
+# This is a Python PySide6 GUI app that displays information about cannabis strains.
 
 # This script comes to you without any warranty whatsoever. I've tried to ensure it is bug-free, but I can't guarantee it. Use at your own risk. If you find any bugs, please let me know or open a pull request on GitHub.
 
@@ -128,12 +128,16 @@ flavor_label.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 about_button = QPushButton("About")
 about_button.setFixedWidth(150)
 
-# Function to display app info
+# Function to display app info message box
 def show_about_info():
     msg = QMessageBox()
+    msg.setWindowIcon(QIcon("resources/leaf.png"))
     msg.setWindowTitle("About PyLeaf")
-    msg.setText('PyLeaf: Cannabis Strain Information<br><br>by Quantum Pixelator<br><br>The data used is from:<br>'
-                '<a href="https://www.kaggle.com/datasets/kingburrito666/cannabis-strains/">Cannabis Strains from Kaggle</a><br><br>License: MIT License<br><br>Source code available on <a href="https://github.com/QuantumPixelator/PyLeaf">GitHub</a>')
+    msg.setText('<div style="text-align: center;"><strong>PyLeaf: Cannabis Strain Information</strong<br><br>v1.0<br><br>by Quantum Pixelator<br><br>'
+                'The data used is from Kaggle:<br>'
+                '<a href="https://www.kaggle.com/datasets/kingburrito666/cannabis-strains/">Cannabis Strains from Kaggle</a><br><br>'
+                'License: MIT<br><br>Latest source code available on <a href="https://github.com/QuantumPixelator/PyLeaf">GitHub</a></div>')
+    
     # Enable link interaction.
     msg.setTextInteractionFlags(Qt.TextBrowserInteraction)
 
@@ -141,7 +145,6 @@ def show_about_info():
     msg.buttonClicked.connect(lambda button: QDesktopServices.openUrl("https://www.kaggle.com/datasets/kingburrito666/cannabis-strains/") if button == QMessageBox.Ok else None)
 
     msg.exec()
-
 
 about_button.clicked.connect(show_about_info)
 
