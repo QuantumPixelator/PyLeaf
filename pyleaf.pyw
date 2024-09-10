@@ -1,6 +1,6 @@
 # This is a Python PySide6 GUI app that displays information about cannabis strains.
 
-# This script comes to you without any warranty whatsoever. I've tried to ensure it is bug-free, but I can't guarantee it. Use at your own risk. If you find any bugs, please let me know or open a pull request on GitHub.
+# This script comes to you without any warranty whatsoever. Use at your own risk. Qu GitHub.
 
 # The data used in this app was obtained from Kaggle:
 # https://www.kaggle.com/datasets/kingburrito666/cannabis-strains/
